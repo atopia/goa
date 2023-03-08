@@ -166,6 +166,22 @@ _git_dir = $(call _assert,$(DIR($1)),Missing declaration of DIR($*))
 		$(MSG_UPDATE)$$dir; \
 		cd $$dir && $(GIT) fetch && $(GIT) reset -q --hard HEAD && $(GIT) checkout -q $(REV($*))
 
+%.sparse-git:
+	$(VERBOSE)test -n "$(REV($*))" ||\
+		($(ECHO) "Error: Undefined revision for $*"; false);
+	$(VERBOSE)test -n "$(URL($*))" ||\
+		($(ECHO) "Error: Undefined URL for $*"; false);
+	$(VERBOSE)test -n "$(SPARSE_PATH($*))" ||\
+		($(ECHO) "Error: Undefined SPARSE_PATH for $*"; false);
+	$(VERBOSE)dir=$(call _git_dir,$*);\
+		sparse_sane=$$(echo $(SPARSE_PATH($*)) |  sed -e 's-^/--') ;\
+		test -d $$dir || $(MSG_DOWNLOAD)$(URL($*)); \
+		test -d $$dir || git clone --depth 1 --filter=blob:none --sparse $(URL($*)) $$dir &> >(sed 's/^/$(MSG_GIT)/'); \
+		cd $$dir && rm * && git sparse-checkout set $$sparse_sane && git checkout -q $(REV($*)) && \
+		sparse_short=$$(echo $$sparse_sane | cut -d / -f 1); sparse_backup=$$(echo $${sparse_short}.SPARSE_BACKUP); \
+		sparse_new=$$(echo $$sparse_sane | sed -e "s/$$sparse_short/$$sparse_backup/") ; \
+		mv $$sparse_short $$sparse_backup && mv $$sparse_new/* . && rm -r $$sparse_backup
+
 
 ##
 ## Obtain source codes from Subversion repository
