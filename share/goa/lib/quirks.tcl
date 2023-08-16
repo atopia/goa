@@ -92,3 +92,10 @@ if {[using_api blit]} {
 
 	lappend lib_src [file join $blit_dir blit.cc]
 }
+
+if {[using_api compat-libc]} {
+
+	set compat_libc_dir [file join [api_archive_dir compat-libc] src lib compat-libc]
+
+	lappend lib_src [file join $compat_libc_dir compat.cc]
+}
