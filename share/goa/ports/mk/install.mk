@@ -248,6 +248,7 @@ _archive_dir  = $(call _assert,$(DIR($1)),Missing definition of DIR($*) in $(POR
 
 _tar_opt   = $(call _prefer,$(TAR_OPT($1)),--strip-components=1)
 _unzip_opt = $(call _prefer,$(UNZIP_OPT($1)),$(UNZIP_OPT))
+_bsdtar_opt = $(call _prefer,$(BSDTAR_OPT($1)),$(BSDTAR_OPT))
 
 #
 # Archive extraction functions for various archive types
@@ -258,7 +259,11 @@ _extract_function(tar.gz)  = tar xmfz $(ARCHIVE) -C $(DIR) $(call _tar_opt,$1)
 _extract_function(tar.xz)  = tar xmfJ $(ARCHIVE) -C $(DIR) $(call _tar_opt,$1)
 _extract_function(tar.bz2) = tar xmfj $(ARCHIVE) -C $(DIR) $(call _tar_opt,$1)
 _extract_function(txz)     = tar xmfJ $(ARCHIVE) -C $(DIR) $(call _tar_opt,$1)
-_extract_function(zip)     = unzip -o -q -d $(DIR) $(call _unzip_opt,$1) $(ARCHIVE)
+
+# if BSDTAR_OPT is set, prefer bsdtar over zip
+_extract_function(zip) = $(if $(call _bsdtar_opt,$1),\
+                              bsdtar xf $(ARCHIVE) -C $(DIR) $(call _bsdtar_opt,$1),\
+                              unzip -o -q -d $(DIR) $(call _unzip_opt,$1) $(ARCHIVE))
 
 _ARCHIVE_EXTS := tar tar.gz tar.xz tgz tar.bz2 txz zip
 
