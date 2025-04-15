@@ -135,7 +135,8 @@ namespace eval ::config {
 			}
 
 			# normalize path
-			set normalized_path [unsafe_file normalize $target_path]
+			set normalized_path [unsafe_file normalize $target_path/___]
+			set normalized_path [unsafe_file dirname $normalized_path]
 			if {![_is_sub_directory $normalized_path $paths]} {
 				exit_with_error "Command 'file $args' operates on an invalid path." \
 				                "Valid paths are:\n" \
