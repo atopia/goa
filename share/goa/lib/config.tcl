@@ -171,28 +171,10 @@ namespace eval ::config {
 			fullnormalize {
 				set path [lindex $args 1]
 
-				set count 0
-				set max_chain 10
-
-				set orig_path $path
-
-				while {[file type $path] eq "link" && $count < $max_chain} {
-					set link_target [file link $path]
-
-					if {[file pathtype $link_target] == "relative"} {
-						set path [file join [file dirname $path] $link_target]
-					} else {
-						set path $link_target
-					}
-					incr count
-				}
-
-				if {[file type $path] eq "link" && $count eq $max_chain} {
-					exit_with_error "Symlink chain of $orig_path exceeds $max_chain"
-				}
-
-				return [file normalize $path]
+				set path [file normalize $path/___]
+				return [file dirname $path]
 			}
+
 			split       -
 			dirname     -
 			tail        -
